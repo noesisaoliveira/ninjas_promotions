@@ -2,7 +2,7 @@
 
 ![Ninjas Promotions](ninjas_promotions/logo.png)
 
-App independente para consultar produtos em promocao no Home Assistant, com identidade visual propria. Versao **0.1.2 experimental**.
+App independente para consultar produtos em promocao no Home Assistant, com identidade visual propria. Versao **0.1.3 experimental**.
 
 - Promocoes recentes por defeito, seguindo a ordem da fonte (publicacoes e atualizacoes).
 - As 13 categorias do site, pesquisa, preco maximo, desconto minimo e etiquetas.
@@ -49,7 +49,7 @@ Os testes normais nao dependem de Internet. `test:live` verifica o HTML real; ex
 
 1. Rever as alteracoes e publicar na branch principal do repositorio. Nao incluir node_modules.
 2. Confirmar que o workflow **Validate app** passou, incluindo os contentores, e testar a instalacao num Home Assistant real.
-3. Criar e publicar uma tag `v0.1.2`. O workflow **Release** verifica os testes, as dependencias e ambas as arquiteturas, e cria uma prerelease com o arquivo do projeto.
+3. Criar e publicar uma tag `v0.1.3`. O workflow **Release** verifica os testes, as dependencias e ambas as arquiteturas, e cria uma prerelease com o arquivo do projeto.
 4. Para novas versoes, manter config.yaml, package.json, a versao da API, Dockerfile e CHANGELOG.md coerentes antes de criar a tag correspondente.
 
 O workflow publica uma prerelease quando recebe uma tag compativel com a versao da app. Adicionar um repositorio personalizado torna a app visivel nessa loja; nao implica aprovacao nem inclusao no repositorio oficial do Home Assistant. Depois da validacao inicial, recomenda-se publicar imagens multi-arquitetura em GHCR e configurar `image` para instalacoes mais rapidas.

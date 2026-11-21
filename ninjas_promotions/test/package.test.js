@@ -29,3 +29,12 @@ test('Home Assistant metadata and assets agree with the application', async cont
   assert.equal(icon.readUInt32BE(16), 128);
   assert.equal(icon.readUInt32BE(20), 128);
 });
+
+test('purchase UI resolves inside Ingress instead of opening a protected route in a new window', async () => {
+  const script = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.ok(script.includes('./api/purchase-link?'));
+  assert.ok(script.includes("credentials: 'same-origin'"));
+  assert.ok(!script.includes('./api/buy?'));
+  assert.ok(!script.includes('window.open('));
+  assert.ok(script.includes('escape(destination.href)'));
+});

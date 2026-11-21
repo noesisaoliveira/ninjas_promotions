@@ -28,7 +28,7 @@ export async function createApp({ repository = new PromotionsRepository(), ingre
     app.get(route, async (_, reply) => reply.type(contentType).send(await readFile(new URL(`../${file}`, import.meta.url))));
   }
   app.get('/health', async () => ({ status: 'ok', name: 'Ninjas Promotions' }));
-  app.get('/api/meta', async () => ({ categories: CATEGORIES, sorts: SORTS, version: '0.1.2' }));
+  app.get('/api/meta', async () => ({ categories: CATEGORIES, sorts: SORTS, version: '0.1.3' }));
   app.get('/api/promotions', {
     schema: { querystring: {
       type: 'object', additionalProperties: false,
@@ -38,6 +38,15 @@ export async function createApp({ repository = new PromotionsRepository(), ingre
       },
     } },
   }, async request => repository.get(request.query.category, request.query.page));
+  app.get('/api/purchase-link', {
+    schema: { querystring: {
+      type: 'object', required: ['id'], additionalProperties: false,
+      properties: { id: { type: 'string', pattern: '^[a-zA-Z0-9_-]+$', minLength: 1, maxLength: 300 } },
+    } },
+  }, async (request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    return { url: await repository.getPurchase(request.query.id) };
+  });
   app.get('/api/buy', {
     schema: { querystring: {
       type: 'object', required: ['id'], additionalProperties: false,

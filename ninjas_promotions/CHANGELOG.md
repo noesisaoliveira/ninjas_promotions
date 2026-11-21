@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+- Preparar o link de compra dentro da sessao Ingress e abrir apenas o endereco externo da loja.
+- Evitar o erro 401 e a abertura de rotas protegidas em navegadores externos nas apps moveis.
+- Mostrar o estado de preparacao da compra e permitir tentar novamente sem pop-ups assincronos.
+
 ## 0.1.2
 
 - Clicar na imagem, no titulo ou na compra abre diretamente o destino do botao Comprar da loja.

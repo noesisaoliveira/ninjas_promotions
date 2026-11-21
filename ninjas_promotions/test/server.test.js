@@ -94,3 +94,16 @@ test('unavailable merchant link shows a branded error instead of opening the sou
   assert.match(response.body, /Ninjas Promotions/);
   assert.match(response.body, /Link da loja indispon/);
 });
+
+test('authenticated Ingress can resolve a merchant URL without navigating outside its session', async context => {
+  const repository = new PromotionsRepository({ fetcher: async () => new Response('<a href="https://link.amazon/B01wBswyf">Comprar na Amazon</a>') });
+  const app = await createApp({ repository, ingressOnly: true });
+  context.after(() => app.close());
+  const response = await app.inject({ url: '/api/purchase-link?id=product-1', remoteAddress: '172.30.32.2' });
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(response.json(), { url: 'https://link.amazon/B01wBswyf' });
+  assert.equal(response.headers.location, undefined);
+  assert.equal(response.headers['cache-control'], 'no-store');
+  assert.equal((await app.inject('/api/purchase-link?id=product-1')).statusCode, 403);
+  assert.equal((await app.inject({ url: '/api/purchase-link?id=../secret', remoteAddress: '172.30.32.2' })).statusCode, 400);
+});

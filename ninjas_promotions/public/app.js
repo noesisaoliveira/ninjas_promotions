@@ -14,6 +14,7 @@ try {
 const state = { products: [], meta: { categories: [], sorts: [] }, category: 'promocoes', page: 0, total: 0, hasMore: false, loading: false, favorites: false, stale: false, fetchedAt: null, error: '', view: 'grid' };
 let controller;
 let toastTimer;
+let purchaseController;
 
 function toast(message) {
   element('toast').textContent = message;
@@ -35,10 +36,6 @@ function filteredProducts() {
   ), element('sort').value);
 }
 
-function offerUrl(product) {
-  return /^[a-zA-Z0-9_-]{1,300}$/.test(product.id) ? `./api/buy?id=${encodeURIComponent(product.id)}` : '#';
-}
-
 function imageUrl(product) {
   return product.image ? `./api/image?path=${encodeURIComponent(product.image)}` : './icon.png';
 }
@@ -48,12 +45,12 @@ function renderCard(product) {
   return `<article class="product" data-id="${escape(product.id)}">
     ${product.discount ? `<span class="discount">-${escape(product.discount)}%</span>` : ''}
     <button class="icon-button save-button ${isSaved ? 'saved' : ''}" data-save="${escape(product.id)}" title="${isSaved ? 'Remover dos guardados' : 'Guardar produto'}" aria-label="${isSaved ? 'Remover dos guardados' : 'Guardar produto'}: ${escape(product.title)}" aria-pressed="${isSaved}">${icon('bookmark')}</button>
-    <a class="product-media" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer" aria-label="Comprar na loja: ${escape(product.title)}"><img src="${escape(imageUrl(product))}" alt="${escape(product.title)}" loading="lazy" width="200" height="160"></a>
-    <div class="product-body"><h2 class="product-title" title="${escape(product.title)}"><a href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer">${escape(product.title)}</a></h2>
+    <button class="product-media" data-details="${escape(product.id)}" aria-label="Comprar na loja: ${escape(product.title)}"><img src="${escape(imageUrl(product))}" alt="${escape(product.title)}" loading="lazy" width="200" height="160"></button>
+    <div class="product-body"><h2 class="product-title" title="${escape(product.title)}"><button class="title-button" data-details="${escape(product.id)}">${escape(product.title)}</button></h2>
     <div class="price-row"><span class="price">${escape(currency(product.price))}</span>${product.originalPrice ? `<del class="original">${escape(currency(product.originalPrice))}</del>` : ''}</div>
     <p class="saving">${product.saving > 0 ? `Poupa ${escape(currency(product.saving))}` : ''}</p>
     ${product.expired ? '<span class="tag-label expired-label">Expirado</span>' : product.tags?.length ? `<span class="tag-label">${escape(product.tags[0])}</span>` : ''}
-    <div class="product-footer"><span class="activity">${escape(product.activity)}</span><div class="product-actions"><button class="icon-button" data-details="${escape(product.id)}" title="Ver detalhes" aria-label="Ver detalhes: ${escape(product.title)}">${icon('scan-eye')}</button><a class="icon-button" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer" title="Comprar na loja" aria-label="Comprar na loja: ${escape(product.title)}">${icon('arrow-up-right')}</a></div></div></div>
+    <div class="product-footer"><span class="activity">${escape(product.activity)}</span><div class="product-actions"><button class="icon-button" data-details="${escape(product.id)}" title="Ver detalhes" aria-label="Ver detalhes: ${escape(product.title)}">${icon('scan-eye')}</button><button class="icon-button" data-details="${escape(product.id)}" title="Comprar na loja" aria-label="Comprar na loja: ${escape(product.title)}">${icon('arrow-up-right')}</button></div></div></div>
   </article>`;
 }
 
@@ -148,13 +145,39 @@ function toggleSave(id) {
   toast(exists ? 'Produto removido dos guardados.' : 'Produto guardado.');
 }
 
-function showDetails(id) {
+async function showDetails(id) {
   const product = [...state.products, ...saved].find(item => item.id === id);
   if (!product) return;
-  element('details-content').innerHTML = `<img class="detail-image" src="${escape(imageUrl(product))}" alt="${escape(product.title)}"><h2 class="detail-title" id="detail-title">${escape(product.title)}</h2><div class="price-row"><span class="price">${escape(currency(product.price))}</span>${product.originalPrice ? `<del class="original">${escape(currency(product.originalPrice))}</del>` : ''}</div><p class="detail-description">${escape(product.description)}</p>${product.tags?.length ? `<p class="detail-description">${product.tags.map(escape).join(' / ')}</p>` : ''}<p class="detail-note">${escape(product.activity)}${product.expired ? ' / Expirado' : ''}</p><a class="primary-button" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer">${icon('external-link')}Comprar na loja</a><p class="detail-note">Confirme o pre\u00e7o final, portes e condi\u00e7\u00f5es na loja. Podem existir cup\u00f5es ou requisitos de compra.</p>`;
+  purchaseController?.abort();
+  const current = new AbortController();
+  purchaseController = current;
+  element('details-content').innerHTML = `<img class="detail-image" src="${escape(imageUrl(product))}" alt="${escape(product.title)}"><h2 class="detail-title" id="detail-title">${escape(product.title)}</h2><div class="price-row"><span class="price">${escape(currency(product.price))}</span>${product.originalPrice ? `<del class="original">${escape(currency(product.originalPrice))}</del>` : ''}</div><p class="detail-description">${escape(product.description)}</p>${product.tags?.length ? `<p class="detail-description">${product.tags.map(escape).join(' / ')}</p>` : ''}<p class="detail-note">${escape(product.activity)}${product.expired ? ' / Expirado' : ''}</p><div id="purchase-action" class="purchase-action" aria-live="polite" aria-busy="true"><button class="primary-button" disabled>${icon('loader-circle')}A preparar compra...</button></div><p class="detail-note">Confirme o pre\u00e7o final, portes e condi\u00e7\u00f5es na loja. Podem existir cup\u00f5es ou requisitos de compra.</p>`;
   element('details').setAttribute('aria-labelledby', 'detail-title');
-  element('details').showModal();
+  if (!element('details').open) element('details').showModal();
   icons();
+  try {
+    if (!/^[a-zA-Z0-9_-]{1,300}$/.test(id)) throw new Error('Invalid product ID');
+    const params = new URLSearchParams({ id });
+    const response = await fetch(`./api/purchase-link?${params}`, {
+      credentials: 'same-origin', signal: current.signal, redirect: 'error',
+    });
+    if (!response.ok) throw new Error('Purchase link unavailable');
+    const data = await response.json();
+    const destination = new URL(data.url);
+    if (destination.protocol !== 'https:' || destination.origin === location.origin
+      || destination.hostname === 'www.dezcontos.pt' || destination.username || destination.password) {
+      throw new Error('Invalid merchant URL');
+    }
+    if (purchaseController !== current || !element('details').open) return;
+    element('purchase-action').setAttribute('aria-busy', 'false');
+    element('purchase-action').innerHTML = `<a class="primary-button" href="${escape(destination.href)}" target="_blank" rel="noopener noreferrer">${icon('external-link')}Comprar na loja</a>`;
+    icons();
+  } catch (error) {
+    if (current.signal.aborted || purchaseController !== current || !element('details').open) return;
+    element('purchase-action').setAttribute('aria-busy', 'false');
+    element('purchase-action').innerHTML = `<p class="detail-note" role="alert">N\u00e3o foi poss\u00edvel preparar o link da loja. Tente novamente.</p><button class="primary-button" data-details="${escape(id)}">${icon('refresh-cw')}Tentar novamente</button>`;
+    icons();
+  }
 }
 
 async function init() {
@@ -198,6 +221,7 @@ element('clear').addEventListener('click', () => {
 });
 for (const view of ['grid', 'list']) element(`${view}-view`).addEventListener('click', () => { state.view = view; render(); });
 element('close-details').addEventListener('click', () => element('details').close());
+element('details').addEventListener('close', () => purchaseController?.abort());
 element('details').addEventListener('click', event => { if (event.target === element('details')) element('details').close(); });
 setInterval(() => { if (!document.hidden && !state.loading && !state.favorites) load(true); }, 300000);
 icons();

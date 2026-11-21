@@ -24,7 +24,14 @@ Atualizacao automatica a cada cinco minutos apenas com a pagina visivel e fora d
 
 Favoritos limitados a 500 produtos, guardados no localStorage do navegador, associados a origem do Home Assistant. Nao sao sincronizados nem separados por utilizador numa sessao partilhada do mesmo navegador. Nao estao nos backups da app; limpar os dados do navegador remove-os. Os precos guardados sao snapshots da altura da selecao.
 
-Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend consulta o site para resultados e imagens; o navegador recebe-os pela app. Clicar na imagem, no titulo ou no botao de compra abre diretamente o destino do botao Comprar da oferta (por exemplo, Comprar na Amazon), sem mostrar a pagina do site de promocoes. O link e obtido no clique e guardado em cache durante cinco minutos; os links curtos e parametros de afiliado originais sao preservados. Se o destino nao puder ser obtido, a app mostra um erro, sem abrir a fonte como alternativa. Os detalhes continuam dentro da app. Precos finais, portes, variantes, cupoes e outras condicoes devem ser confirmados na loja.
+Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend consulta o site para resultados e imagens; o navegador recebe-os pela app. Os links curtos e parametros de afiliado originais sao preservados. Precos finais, portes, variantes, cupoes e outras condicoes devem ser confirmados na loja.
+
+## Comprar na loja
+
+1. Tocar na imagem, no titulo ou no botao de compra do produto. Os detalhes abrem dentro da app e o link e preparado na sessao atual do Home Assistant.
+2. Quando Comprar na loja estiver disponivel, tocar nesse botao para abrir o endereco HTTPS externo original da oferta (por exemplo, o link Comprar na Amazon).
+
+O navegador externo recebe apenas o endereco da loja, nunca a rota protegida Ingress do Home Assistant. Estes dois toques evitam a perda da sessao nas apps iPhone/Android e permitem abrir o endereco a partir de um gesto direto, sem pop-ups assincronos. O link fica em cache no servidor durante cinco minutos. Se a preparacao falhar, aparece Tentar novamente; nao e aberta a fonte como alternativa.
 
 ## Problemas frequentes
 
@@ -33,6 +40,7 @@ Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend co
 - **Sem promocoes:** atualizar, verificar acesso a fonte e logs da app. Alteracoes no HTML podem exigir uma atualizacao do extrator.
 - **Imagem indisponivel:** a fonte pode ter removido a imagem; a app nao substitui imagens por produtos ficticios.
 - **Erro 403 fora do Home Assistant:** esperado no contentor; usar Ingress, nao acesso direto a porta.
+- **Erro 401 ao comprar na app movel:** nao abrir uma URL Ingress num navegador externo. Usar Comprar na loja depois de o link estar preparado na app; o destino deve ser um endereco externo, nao o servidor Home Assistant.
 - **Favoritos diferentes:** sao locais ao navegador/origem, nao a conta Home Assistant.
 
 ## Estado e publicacao
