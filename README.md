@@ -56,7 +56,6 @@ O workflow publica uma prerelease quando recebe uma tag compativel com a versao 
 
 ## Dados, privacidade e limitacoes
 
-Fonte: [dezcontos.pt/promocoes](https://www.dezcontos.pt/promocoes). A interface nao inclui o branding, banners, anuncios, cookies ou scripts desse site. Os detalhes abrem a oferta original num novo separador; esse site externo conserva a sua identidade e pode usar links de afiliado.
 
 Nao existe uma API publica documentada utilizada aqui: a app extrai os cartoes do HTML publico. O robots.txt consultado permite crawling, mas isso **nao concede licenca de reutilizacao**. Antes de uma distribuicao publica, verificar os termos e obter autorizacao para a recolha e exibicao dos dados e imagens. A licenca MIT do projeto nao se aplica aos conteudos de terceiros. A app nao e afiliada ao site nem ao Home Assistant.
 
