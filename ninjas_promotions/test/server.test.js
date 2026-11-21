@@ -66,14 +66,14 @@ test('buy action fetches only the source, caches the CTA, and redirects to the m
   const repository = new PromotionsRepository({ fetcher: async url => {
     requests++;
     assert.equal(url.href, 'https://www.dezcontos.pt/oferta/product-1');
-    return new Response('<a href="https://link.amazon/B01wBswyf">Comprar na Amazon</a>');
+    return new Response('<a href="https://www.amazon.es/dp/B01wBswyf">Comprar na Amazon</a>');
   } });
   const app = await createApp({ repository });
   context.after(() => app.close());
   const responses = await Promise.all([app.inject('/api/buy?id=product-1'), app.inject('/api/buy?id=product-1')]);
   for (const response of responses) {
     assert.equal(response.statusCode, 302);
-    assert.equal(response.headers.location, 'https://link.amazon/B01wBswyf');
+    assert.equal(response.headers.location, 'https://www.amazon.es/dp/B01wBswyf');
     assert.equal(response.headers['cache-control'], 'no-store');
   }
   await app.inject('/api/buy?id=product-1');
@@ -96,14 +96,56 @@ test('unavailable merchant link shows a branded error instead of opening the sou
 });
 
 test('authenticated Ingress can resolve a merchant URL without navigating outside its session', async context => {
-  const repository = new PromotionsRepository({ fetcher: async () => new Response('<a href="https://link.amazon/B01wBswyf">Comprar na Amazon</a>') });
+  const repository = new PromotionsRepository({ fetcher: async () => new Response('<a href="https://www.amazon.es/dp/B01wBswyf">Comprar na Amazon</a>') });
   const app = await createApp({ repository, ingressOnly: true });
   context.after(() => app.close());
   const response = await app.inject({ url: '/api/purchase-link?id=product-1', remoteAddress: '172.30.32.2' });
   assert.equal(response.statusCode, 200);
-  assert.deepEqual(response.json(), { url: 'https://link.amazon/B01wBswyf' });
+  assert.deepEqual(response.json(), { url: 'https://www.amazon.es/dp/B01wBswyf' });
   assert.equal(response.headers.location, undefined);
   assert.equal(response.headers['cache-control'], 'no-store');
   assert.equal((await app.inject('/api/purchase-link?id=product-1')).statusCode, 403);
   assert.equal((await app.inject({ url: '/api/purchase-link?id=../secret', remoteAddress: '172.30.32.2' })).statusCode, 400);
+});
+
+test('Amazon short links expand on the server without changing product or affiliate parameters', async () => {
+  const requested = [];
+  const finalUrl = 'https://www.amazon.es/dp/B0049U0DMC?th=1&tag=partner-21&ascsubtag=original';
+  const repository = new PromotionsRepository({ fetcher: async (url, options) => {
+    requested.push(url.href);
+    if (url.hostname === 'www.dezcontos.pt') return new Response('<a href="https://link.amazon/example">Comprar na Amazon</a>');
+    assert.equal(options.redirect, 'manual');
+    if (url.hostname === 'link.amazon') return new Response(null, { status: 302, headers: { location: 'https://amzlinks.in/example' } });
+    return new Response(null, { status: 302, headers: { location: finalUrl } });
+  } });
+  const results = await Promise.all([repository.getPurchase('product-1'), repository.getPurchase('product-1')]);
+  assert.deepEqual(results, [finalUrl, finalUrl]);
+  await repository.getPurchase('product-1');
+  assert.deepEqual(requested, ['https://www.dezcontos.pt/oferta/product-1', 'https://link.amazon/example', 'https://amzlinks.in/example']);
+});
+
+test('Amazon expansion rejects private, unrelated and native-app redirects before following them', async () => {
+  for (const location of ['https://127.0.0.1/private', 'https://evil.example/amazon', 'https://amazon.es.evil.example/product', 'amazonmobile://product', 'http://www.amazon.es/dp/product', 'https://user:password@www.amazon.es/dp/product']) {
+    let requests = 0;
+    const repository = new PromotionsRepository({ fetcher: async url => {
+      requests++;
+      if (url.hostname === 'www.dezcontos.pt') return new Response('<a href="https://amzn.to/example">Comprar na Amazon</a>');
+      return new Response(null, { status: 302, headers: { location } });
+    } });
+    await assert.rejects(repository.getPurchase('product-1'), { statusCode: 502 });
+    assert.equal(requests, 2);
+  }
+});
+
+test('Amazon expansion bounds loops and leaves other stores unchanged', async () => {
+  let requests = 0;
+  const repository = new PromotionsRepository({ fetcher: async () => {
+    requests++;
+    return new Response(null, { status: 302, headers: { location: 'https://link.amazon/loop' } });
+  } });
+  await assert.rejects(repository.resolveAmazonLink('https://link.amazon/loop'), /Too many/);
+  assert.equal(requests, 4);
+  const store = 'https://www.worten.pt/product?partner=original';
+  assert.equal(await repository.resolveAmazonLink(store), store);
+  assert.equal(requests, 4);
 });

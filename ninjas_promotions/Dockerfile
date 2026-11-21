@@ -1,6 +1,6 @@
 FROM node:24.13.0-alpine3.23
 
-ARG BUILD_VERSION=0.1.3
+ARG BUILD_VERSION=0.1.4
 ARG BUILD_ARCH
 LABEL io.hass.version="${BUILD_VERSION}" \
       io.hass.arch="${BUILD_ARCH}" \

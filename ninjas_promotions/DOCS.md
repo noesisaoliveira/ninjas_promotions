@@ -24,7 +24,7 @@ Atualizacao automatica a cada cinco minutos apenas com a pagina visivel e fora d
 
 Favoritos limitados a 500 produtos, guardados no localStorage do navegador, associados a origem do Home Assistant. Nao sao sincronizados nem separados por utilizador numa sessao partilhada do mesmo navegador. Nao estao nos backups da app; limpar os dados do navegador remove-os. Os precos guardados sao snapshots da altura da selecao.
 
-Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend consulta o site para resultados e imagens; o navegador recebe-os pela app. Os links curtos e parametros de afiliado originais sao preservados. Precos finais, portes, variantes, cupoes e outras condicoes devem ser confirmados na loja.
+Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend consulta o site para resultados e imagens e resolve encurtadores Amazon ao preparar a compra. Os parametros de afiliado originais do destino sao preservados. Precos finais, portes, variantes, cupoes e outras condicoes devem ser confirmados na loja.
 
 ## Comprar na loja
 
@@ -32,6 +32,8 @@ Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend co
 2. Quando Comprar na loja estiver disponivel, tocar nesse botao para abrir o endereco HTTPS externo original da oferta (por exemplo, o link Comprar na Amazon).
 
 O navegador externo recebe apenas o endereco da loja, nunca a rota protegida Ingress do Home Assistant. Estes dois toques evitam a perda da sessao nas apps iPhone/Android e permitem abrir o endereco a partir de um gesto direto, sem pop-ups assincronos. O link fica em cache no servidor durante cinco minutos. Se a preparacao falhar, aparece Tentar novamente; nao e aberta a fonte como alternativa.
+
+Para Amazon, os encurtadores link.amazon, amzlinks.in e amzn.to sao resolvidos no servidor antes de apresentar Comprar na loja. O botao recebe o URL HTTPS completo do produto, com os parametros originais, evitando passar pelos intermediarios no navegador Android. A resolucao aceita no maximo quatro redirecionamentos em dez segundos e recusa outros dominios, destinos privados ou esquemas de aplicacoes. O sistema operativo decide se o URL Amazon abre no navegador ou na app Amazon.
 
 ## Problemas frequentes
 

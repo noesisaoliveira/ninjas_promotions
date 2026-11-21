@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+- Resolver encurtadores Amazon no servidor e apresentar o URL HTTPS completo do produto antes de abrir a compra.
+- Preservar os parametros de afiliado e limitar a resolucao a dominios conhecidos e quatro redirecionamentos.
+- Acrescentar testes de encurtadores, cache, preservacao de parametros e bloqueio de destinos inseguros.
+
 ## 0.1.3
 
 - Preparar o link de compra dentro da sessao Ingress e abrir apenas o endereco externo da loja.
