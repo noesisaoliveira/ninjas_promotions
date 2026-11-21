@@ -2,7 +2,6 @@
 
 ## Instalacao
 
-Home Assistant OS com Supervisor, arquitetura amd64 ou aarch64 e acesso HTTPS a `www.dezcontos.pt` e aos registos de pacotes para construir a imagem.
 
 Na loja de apps/complementos, adicionar `https://github.com/noesisaoliveira/ninjas_promotions` aos repositorios. Instalar **Ninjas Promotions**, iniciar e ativar **Mostrar na barra lateral**. Repositorio personalizado, nao HACS nem catalogo oficial. A branch publicada deve conter repository.yaml na raiz e esta pasta com config.yaml e Dockerfile.
 
