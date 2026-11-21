@@ -1,4 +1,4 @@
-import { sortProducts } from './order.js';
+import { normalizeSearch, sortProducts } from './order.js';
 
 const element = id => document.getElementById(id);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
@@ -15,25 +15,64 @@ const state = { products: [], meta: { categories: [], sorts: [] }, category: 'pr
 let controller;
 let toastTimer;
 let purchaseController;
+let christmasClicks = [];
+let christmasTimer;
 
-function toast(message) {
+function toast(message, duration = 3000) {
   element('toast').textContent = message;
   element('toast').hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { element('toast').hidden = true; }, 3000);
+  toastTimer = setTimeout(() => { element('toast').hidden = true; }, duration);
+}
+
+function stopChristmas() {
+  clearTimeout(christmasTimer);
+  element('christmas-snow').hidden = true;
+  element('christmas-snow').replaceChildren();
+  element('christmas-lights').hidden = true;
+  element('christmas-lights').replaceChildren();
+  element('brand-icon').classList.remove('christmas-hat');
+}
+
+function christmasClick() {
+  const now = performance.now();
+  christmasClicks = christmasClicks.filter(time => now - time < 1500);
+  christmasClicks.push(now);
+  if (christmasClicks.length < 3) return;
+  christmasClicks = [];
+  if (element('brand-icon').classList.contains('christmas-hat')) {
+    stopChristmas();
+    return;
+  }
+  element('brand-icon').classList.add('christmas-hat');
+  element('christmas-lights').innerHTML = ['top', 'right', 'bottom', 'left'].map(edge => {
+    const length = edge === 'top' || edge === 'bottom' ? innerWidth : innerHeight;
+    const count = Math.min(28, Math.max(6, Math.floor(length / 56)));
+    return `<div class="christmas-rail christmas-rail-${edge}">${Array.from({ length: count }, () => '<span class="christmas-bulb"></span>').join('')}</div>`;
+  }).join('');
+  element('christmas-lights').hidden = false;
+  toast('Feliz Natal, ninja! Boas festas da Ninjas Promotions.', 8000);
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    element('christmas-snow').innerHTML = Array.from({ length: 18 }, () => `<span class="christmas-flake">${icon('snowflake')}</span>`).join('');
+    element('christmas-snow').hidden = false;
+    icons();
+  }
+  christmasTimer = setTimeout(stopChristmas, 12000);
 }
 
 function filteredProducts() {
-  const query = element('search').value.trim().toLocaleLowerCase('pt');
+  const terms = normalizeSearch(element('search').value).split(' ').filter(Boolean);
   const maximum = element('max-price').value === '' ? Infinity : Number(element('max-price').value);
   const minimum = Number(element('min-discount').value);
   const tag = element('tag').value;
-  return sortProducts((state.favorites ? saved : state.products).filter(product =>
-    `${product.title} ${product.description}`.toLocaleLowerCase('pt').includes(query)
-    && product.price <= maximum && product.discount >= minimum
-    && (!tag || product.tags?.includes(tag))
-    && (!element('hide-expired').checked || !product.expired)
-  ), element('sort').value);
+  return sortProducts((state.favorites ? saved : state.products).filter(product => {
+    const text = normalizeSearch(`${product.title} ${product.description || ''}`);
+    const compactText = text.replace(/ /g, '');
+    return terms.every(term => text.includes(term) || compactText.includes(term))
+      && product.price <= maximum && product.discount >= minimum
+      && (!tag || product.tags?.includes(tag))
+      && (!element('hide-expired').checked || !product.expired);
+  }), element('sort').value);
 }
 
 function imageUrl(product) {
@@ -220,6 +259,8 @@ element('clear').addEventListener('click', () => {
   element('filters').reset(); element('search').value = ''; element('sort').value = 'recent'; render();
 });
 for (const view of ['grid', 'list']) element(`${view}-view`).addEventListener('click', () => { state.view = view; render(); });
+element('brand-icon').addEventListener('click', christmasClick);
+document.addEventListener('keydown', event => { if (event.key === 'Escape') stopChristmas(); });
 element('close-details').addEventListener('click', () => element('details').close());
 element('details').addEventListener('close', () => purchaseController?.abort());
 element('details').addEventListener('click', event => { if (event.target === element('details')) element('details').close(); });

@@ -1,6 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { money, parsePromotions, parsePurchaseLink, sortProducts } from '../src/source.js';
+import { normalizeSearch } from '../public/order.js';
+
+test('search ignores punctuation, case, accents and repeated spaces', () => {
+  for (const value of ['Only & Sons', 'ONLY&SONS', 'only-sons', '  only   sons  ', 'Only + Sons']) {
+    assert.equal(normalizeSearch(value), 'only sons');
+  }
+  assert.equal(normalizeSearch('Cal\u00e7as, caf\u00e9 e beb\u00e9s'), 'calcas cafe e bebes');
+  assert.equal(normalizeSearch('T5 / 168'), 't5 168');
+  assert.equal(normalizeSearch(null), '');
+  assert.equal(normalizeSearch(' & '), '');
+  assert.ok(normalizeSearch('Only & Sons').replace(/ /g, '').includes(normalizeSearch('onlysons')));
+});
 
 test('Portuguese prices retain thousands and decimals', () => {
   assert.equal(money('1.234,56 €'), 1234.56);

@@ -7,6 +7,11 @@ export const SORTS = [
   { id: 'name', label: 'Nome: A a Z' },
 ];
 
+export function normalizeSearch(value) {
+  return String(value ?? '').normalize('NFKD').toLocaleLowerCase('pt')
+    .replace(/\p{M}/gu, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
 export function sortProducts(products, sort = 'recent') {
   const comparators = {
     'price-asc': (first, second) => first.price - second.price,

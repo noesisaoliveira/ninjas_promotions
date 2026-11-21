@@ -12,10 +12,10 @@
 </head>
 <body>
   <header class="app-header">
-    <a class="brand" href="./" aria-label="Ninjas Promotions, in&iacute;cio">
-      <img src="./icon.png" width="48" height="48" alt="">
-      <span><strong>Ninjas</strong><span class="brand-sub">Promotions</span></span>
-    </a>
+    <div class="brand">
+      <button id="brand-icon" class="brand-icon" type="button" aria-label="Ninjas Promotions"><img src="./icon.png" width="48" height="48" alt=""></button>
+      <a href="./" aria-label="Ninjas Promotions, in&iacute;cio"><strong>Ninjas</strong><span class="brand-sub">Promotions</span></a>
+    </div>
     <div class="header-end"><span class="connection" id="connection">A ligar</span><button id="refresh" class="icon-button" title="Atualizar promo&ccedil;&otilde;es" aria-label="Atualizar promo&ccedil;&otilde;es"><i data-lucide="refresh-cw"></i></button></div>
   </header>
   <div class="workspace">
@@ -28,7 +28,7 @@
       <p class="section-label categories-label">CATEGORIAS</p>
       <nav id="categories" class="category-nav" aria-label="Categorias"></nav>
       <label class="mobile-category">Categoria<select id="category-select" aria-label="Categoria"></select></label>
-      <div class="sidebar-footer"><span class="mini-mark">NP</span><span>Ninjas Promotions<br><small>v0.1.4</small></span></div>
+      <div class="sidebar-footer"><span class="mini-mark">NP</span><span>Ninjas Promotions<br><small>v0.1.5</small></span></div>
     </aside>
     <main>
       <div class="heading-row"><div><p class="section-label">RADAR DE PROMO&Ccedil;&Otilde;ES</p><h1 id="heading">Todas as promo&ccedil;&otilde;es</h1></div><div class="view-switch" role="group" aria-label="Vista"><button id="grid-view" class="icon-button selected" aria-label="Grelha" title="Grelha" aria-pressed="true"><i data-lucide="layout-grid"></i></button><button id="list-view" class="icon-button" aria-label="Lista" title="Lista" aria-pressed="false"><i data-lucide="list"></i></button></div></div>
@@ -52,5 +52,7 @@
   </div>
   <dialog id="details"><button id="close-details" class="icon-button modal-close" aria-label="Fechar detalhes" title="Fechar"><i data-lucide="x"></i></button><div id="details-content"></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
+  <div id="christmas-snow" class="christmas-snow" aria-hidden="true" hidden></div>
+  <div id="christmas-lights" class="christmas-lights" aria-hidden="true" hidden></div>
 </body>
 </html>

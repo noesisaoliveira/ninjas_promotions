@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5
+
+- Pesquisa tolerante a simbolos, acentos, maiusculas, espacos e palavras noutra ordem.
+- Encontrar Only & Sons com only sons, onlysons ou sons only.
+- Easter egg de Natal com gorro, neve, mensagem festiva e grinalda de pequenas luzes multicoloridas nas quatro margens.
+- Ativacao por tres cliques no icone, desligamento automatico e respeito pelo movimento reduzido, sem bloquear os controlos.
+
 ## 0.1.4
 
 - Resolver encurtadores Amazon no servidor e apresentar o URL HTTPS completo do produto antes de abrir a compra.
