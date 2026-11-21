@@ -1,0 +1,36 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: ninjas_promotions/package-lock.json
+      - run: npm --prefix ninjas_promotions ci
+      - run: npm --prefix ninjas_promotions test
+      - run: npm --prefix ninjas_promotions audit --audit-level=moderate
+      - name: Check tag matches app version
+        working-directory: ninjas_promotions
+        run: node --input-type=module -e "import fs from 'node:fs'; import {parse} from 'yaml'; const version=parse(fs.readFileSync('config.yaml','utf8')).version; if(process.env.GITHUB_REF_NAME!=='v'+version)throw Error('Tag must match config.yaml');"
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Verify both architectures before releasing
+        uses: docker/build-push-action@v6
+        with:
+          context: ninjas_promotions
+          platforms: linux/amd64,linux/arm64
+          push: false
+      - name: Create source archive
+        run: git archive --format=zip --output=ninjas-promotions.zip HEAD
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" ninjas-promotions.zip --verify-tag --title "Ninjas Promotions $GITHUB_REF_NAME" --notes-file ninjas_promotions/CHANGELOG.md --prerelease

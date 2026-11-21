@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152521">
+  <title>Ninjas Promotions</title>
+  <link rel="icon" href="./icon.png">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./lucide.js" defer></script>
+  <script src="./app.js" type="module"></script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="Ninjas Promotions, in&iacute;cio">
+      <img src="./icon.png" width="48" height="48" alt="">
+      <span><strong>Ninjas</strong><span class="brand-sub">Promotions</span></span>
+    </a>
+    <div class="header-end"><span class="connection" id="connection">A ligar</span><button id="refresh" class="icon-button" title="Atualizar promo&ccedil;&otilde;es" aria-label="Atualizar promo&ccedil;&otilde;es"><i data-lucide="refresh-cw"></i></button></div>
+  </header>
+  <div class="workspace">
+    <aside class="sidebar">
+      <p class="section-label">EXPLORAR</p>
+      <nav class="tabs" aria-label="Promo&ccedil;&otilde;es">
+        <button id="all-tab" class="nav-button active" aria-pressed="true"><i data-lucide="tags"></i>Promo&ccedil;&otilde;es</button>
+        <button id="favorites-tab" class="nav-button" aria-pressed="false"><i data-lucide="bookmark"></i>Guardados<span id="favorite-count" class="counter">0</span></button>
+      </nav>
+      <p class="section-label categories-label">CATEGORIAS</p>
+      <nav id="categories" class="category-nav" aria-label="Categorias"></nav>
+      <label class="mobile-category">Categoria<select id="category-select" aria-label="Categoria"></select></label>
+      <div class="sidebar-footer"><span class="mini-mark">NP</span><span>Ninjas Promotions<br><small>v0.1.0</small></span></div>
+    </aside>
+    <main>
+      <div class="heading-row"><div><p class="section-label">RADAR DE PROMO&Ccedil;&Otilde;ES</p><h1 id="heading">Todas as promo&ccedil;&otilde;es</h1></div><div class="view-switch" role="group" aria-label="Vista"><button id="grid-view" class="icon-button selected" aria-label="Grelha" title="Grelha" aria-pressed="true"><i data-lucide="layout-grid"></i></button><button id="list-view" class="icon-button" aria-label="Lista" title="Lista" aria-pressed="false"><i data-lucide="list"></i></button></div></div>
+      <div class="toolbar">
+        <label class="search"><i data-lucide="search"></i><input id="search" type="search" placeholder="Pesquisar produtos" aria-label="Pesquisar produtos carregados"></label>
+        <label class="sort-control"><span>Ordenar os carregados</span><select id="sort" aria-label="Ordenar os carregados"></select></label>
+      </div>
+      <form class="filters" id="filters">
+        <label>Pre&ccedil;o m&aacute;ximo (&euro;)<input id="max-price" type="number" min="0" step="0.01" placeholder="Sem limite"></label>
+        <label>Desconto m&iacute;nimo<select id="min-discount"><option value="0">Qualquer desconto</option><option value="15">15% ou mais</option><option value="30">30% ou mais</option><option value="50">50% ou mais</option><option value="70">70% ou mais</option></select></label>
+        <label>Etiqueta<select id="tag"><option value="">Todas as etiquetas</option></select></label>
+        <label class="check-label"><input id="hide-expired" type="checkbox" checked>Ocultar expirados</label>
+        <button id="clear" type="button" class="icon-button" aria-label="Limpar filtros" title="Limpar filtros"><i data-lucide="filter-x"></i></button>
+      </form>
+      <div class="results-meta"><span id="count">A obter promo&ccedil;&otilde;es...</span><span id="updated"></span></div>
+      <div id="status" class="status" role="status" hidden></div>
+      <section id="products" class="products" aria-label="Produtos em promo&ccedil;&atilde;o" aria-busy="true"></section>
+      <div class="pagination"><button id="load-more" class="primary-button" hidden><i data-lucide="plus"></i>Carregar mais</button></div>
+      <footer class="main-footer"><span>Ninjas Promotions</span><span>Pre&ccedil;os e disponibilidade sujeitos a altera&ccedil;&atilde;o.</span></footer>
+    </main>
+  </div>
+  <dialog id="details"><button id="close-details" class="icon-button modal-close" aria-label="Fechar detalhes" title="Fechar"><i data-lucide="x"></i></button><div id="details-content"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

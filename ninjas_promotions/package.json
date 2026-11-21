@@ -1,0 +1,22 @@
+{
+  "name": "ninjas-promotions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test",
+    "test:live": "node scripts/check-source.js",
+    "assets": "node scripts/build-assets.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "fastify": "^5.6.2",
+    "lucide": "^0.468.0"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5",
+    "yaml": "^2.8.1"
+  }
+}

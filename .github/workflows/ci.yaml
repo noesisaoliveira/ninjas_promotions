@@ -1,0 +1,45 @@
+name: Validate app
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ninjas_promotions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: ninjas_promotions/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm audit --audit-level=moderate
+      - run: node --check public/app.js
+  container:
+    needs: tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            arch: amd64
+          - platform: linux/arm64
+            arch: aarch64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ninjas_promotions
+          platforms: ${{ matrix.platform }}
+          push: false
+          build-args: BUILD_ARCH=${{ matrix.arch }}
