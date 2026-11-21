@@ -28,7 +28,7 @@ export async function createApp({ repository = new PromotionsRepository(), ingre
     app.get(route, async (_, reply) => reply.type(contentType).send(await readFile(new URL(`../${file}`, import.meta.url))));
   }
   app.get('/health', async () => ({ status: 'ok', name: 'Ninjas Promotions' }));
-  app.get('/api/meta', async () => ({ categories: CATEGORIES, sorts: SORTS, version: '0.1.0' }));
+  app.get('/api/meta', async () => ({ categories: CATEGORIES, sorts: SORTS, version: '0.1.1' }));
   app.get('/api/promotions', {
     schema: { querystring: {
       type: 'object', additionalProperties: false,

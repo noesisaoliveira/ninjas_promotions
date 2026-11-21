@@ -2,7 +2,7 @@
 
 ![Ninjas Promotions](ninjas_promotions/logo.png)
 
-App independente para consultar produtos em promocao no Home Assistant, com identidade visual propria. Versao inicial **0.1.0 experimental**.
+App independente para consultar produtos em promocao no Home Assistant, com identidade visual propria. Versao **0.1.1 experimental**.
 
 - Promocoes recentes por defeito, seguindo a ordem da fonte (publicacoes e atualizacoes).
 - As 13 categorias do site, pesquisa, preco maximo, desconto minimo e etiquetas.
@@ -49,14 +49,12 @@ Os testes normais nao dependem de Internet. `test:live` verifica o HTML real; ex
 
 1. Rever as alteracoes e publicar na branch principal do repositorio. Nao incluir node_modules.
 2. Confirmar que o workflow **Validate app** passou, incluindo os contentores, e testar a instalacao num Home Assistant real.
-3. Criar e publicar uma tag `v0.1.0`. O workflow **Release** verifica os testes, as dependencias e ambas as arquiteturas, e cria uma prerelease com o arquivo do projeto.
+3. Criar e publicar uma tag `v0.1.1`. O workflow **Release** verifica os testes, as dependencias e ambas as arquiteturas, e cria uma prerelease com o arquivo do projeto.
 4. Para novas versoes, manter config.yaml, package.json, a versao da API, Dockerfile e CHANGELOG.md coerentes antes de criar a tag correspondente.
 
 O workflow publica uma prerelease quando recebe uma tag compativel com a versao da app. Adicionar um repositorio personalizado torna a app visivel nessa loja; nao implica aprovacao nem inclusao no repositorio oficial do Home Assistant. Depois da validacao inicial, recomenda-se publicar imagens multi-arquitetura em GHCR e configurar `image` para instalacoes mais rapidas.
 
 ## Dados, privacidade e limitacoes
-
-Fonte: [dezcontos.pt/promocoes](https://www.dezcontos.pt/promocoes). A interface nao inclui o branding, banners, anuncios, cookies ou scripts desse site. Os detalhes abrem a oferta original num novo separador; esse site externo conserva a sua identidade e pode usar links de afiliado.
 
 Nao existe uma API publica documentada utilizada aqui: a app extrai os cartoes do HTML publico. O robots.txt consultado permite crawling, mas isso **nao concede licenca de reutilizacao**. Antes de uma distribuicao publica, verificar os termos e obter autorizacao para a recolha e exibicao dos dados e imagens. A licenca MIT do projeto nao se aplica aos conteudos de terceiros. A app nao e afiliada ao site nem ao Home Assistant.
 

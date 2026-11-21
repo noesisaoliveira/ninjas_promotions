@@ -2,7 +2,7 @@
 
 ## Instalacao
 
-Home Assistant OS com Supervisor, arquitetura amd64 ou aarch64 e acesso HTTPS a `www.dezcontos.pt` e aos registos de pacotes para construir a imagem.
+Home Assistant OS com Supervisor, arquitetura amd64 ou aarch64 e acesso HTTPS e aos registos de pacotes para construir a imagem.
 
 Na loja de apps/complementos, adicionar `https://github.com/noesisaoliveira/ninjas_promotions` aos repositorios. Instalar **Ninjas Promotions**, iniciar e ativar **Mostrar na barra lateral**. Repositorio personalizado, nao HACS nem catalogo oficial. A branch publicada deve conter repository.yaml na raiz e esta pasta com config.yaml e Dockerfile.
 
@@ -38,7 +38,5 @@ Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend co
 ## Estado e publicacao
 
 Versao experimental sem validacao numa instancia real de Home Assistant. O GitHub Actions testa o pacote e constroi ambas as arquiteturas. Docker nao estava disponivel no ambiente de desenvolvimento inicial; as arquiteturas devem ser confirmadas pelo CI e por instalacao real antes de promover a stable.
-
-O robots.txt consultado permite crawling, mas nao concede direitos de republicacao. Antes de distribuicao publica, verificar termos e obter autorizacao para dados e fotografias. A app e independente de dezcontos.pt e do Home Assistant. MIT aplica-se apenas ao codigo e marca originais deste repositorio, nao aos produtos ou imagens de terceiros.
 
 Reportar problemas em [GitHub Issues](https://github.com/noesisaoliveira/ninjas_promotions/issues), indicando versao, arquitetura, categoria e logs sem dados pessoais.

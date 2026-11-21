@@ -6,6 +6,6 @@ Produtos em promocao no Home Assistant, com branding proprio, categorias, pesqui
 
 Interface responsiva com fotografias dos produtos, grelha/lista, filtros, detalhes e indicacao de ofertas expiradas. As ofertas abrem na fonte original num separador externo.
 
-Versao **0.1.0 experimental**. Requer Internet e Home Assistant com Supervisor (amd64 ou aarch64). Sem portas publicas: a interface usa Ingress. Nao requer HACS ou permissoes administrativas da app.
+Versao **0.1.1 experimental**. Requer Internet e Home Assistant com Supervisor (amd64 ou aarch64). Sem portas publicas: a interface usa Ingress. Nao requer HACS ou permissoes administrativas da app.
 
 Consultar o separador Documentacao para instalacao, limites e privacidade. A distribuicao publica dos dados/imagens deve ser autorizada pela fonte.

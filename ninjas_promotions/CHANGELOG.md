@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Incluir as alteracoes locais em README.md e DOCS.md.
+- Substituir a prerelease 0.1.0 pela 0.1.1, sem alteracoes funcionais.
+
 ## 0.1.0
 
 - Primeira versao experimental da Ninjas Promotions para Home Assistant Ingress.
