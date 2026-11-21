@@ -1,4 +1,5 @@
 import { load } from 'cheerio';
+import { isIP } from 'node:net';
 export { SORTS, sortProducts } from '../public/order.js';
 
 export const SOURCE = 'https://www.dezcontos.pt';
@@ -20,6 +21,24 @@ export const CATEGORIES = [
 ].map(([id, label, icon]) => ({ id, label, icon }));
 const clean = (text) => text.replace(/\s+/g, ' ').trim();
 export const money = (text) => Number(text.replace(/[^\d,]/g, '').replace(',', '.'));
+
+export function parsePurchaseLink(html) {
+  const document = load(html);
+  let destination = null;
+  document('a[href]').each((_, element) => {
+    if (destination) return;
+    const anchor = document(element);
+    if (!/^(Comprar|Ir para a loja)(\s|$)/i.test(clean(anchor.text()))) return;
+    try {
+      const url = new URL(anchor.attr('href'), SOURCE);
+      if (url.protocol !== 'https:' || url.username || url.password || url.port
+        || url.hostname === new URL(SOURCE).hostname || isIP(url.hostname)
+        || !url.hostname.includes('.') || url.hostname.endsWith('.local')) return;
+      destination = url.href;
+    } catch {}
+  });
+  return destination;
+}
 
 export function parsePromotions(html) {
   const document = load(html);

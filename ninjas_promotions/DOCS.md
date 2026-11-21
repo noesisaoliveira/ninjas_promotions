@@ -24,7 +24,7 @@ Atualizacao automatica a cada cinco minutos apenas com a pagina visivel e fora d
 
 Favoritos limitados a 500 produtos, guardados no localStorage do navegador, associados a origem do Home Assistant. Nao sao sincronizados nem separados por utilizador numa sessao partilhada do mesmo navegador. Nao estao nos backups da app; limpar os dados do navegador remove-os. Os precos guardados sao snapshots da altura da selecao.
 
-Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend consulta o site para resultados e imagens; o navegador recebe-os pela app. Abrir a oferta sai para o site original, que pode ter cookies e links de afiliado. Precos finais, portes, variantes, cupoes e outras condicoes devem ser confirmados na loja.
+Sem analytics, cookies, scripts ou branding da fonte dentro da app. O backend consulta o site para resultados e imagens; o navegador recebe-os pela app. Clicar na imagem, no titulo ou no botao de compra abre diretamente o destino do botao Comprar da oferta (por exemplo, Comprar na Amazon), sem mostrar a pagina do site de promocoes. O link e obtido no clique e guardado em cache durante cinco minutos; os links curtos e parametros de afiliado originais sao preservados. Se o destino nao puder ser obtido, a app mostra um erro, sem abrir a fonte como alternativa. Os detalhes continuam dentro da app. Precos finais, portes, variantes, cupoes e outras condicoes devem ser confirmados na loja.
 
 ## Problemas frequentes
 

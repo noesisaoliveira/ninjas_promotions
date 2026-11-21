@@ -60,3 +60,37 @@ test('image filenames can contain plus without permitting external URLs', async 
   assert.equal(requested.pathname, path);
   assert.equal((await app.inject(`/api/image?path=${encodeURIComponent('/api/images/../secret.jpeg')}`)).statusCode, 400);
 });
+
+test('buy action fetches only the source, caches the CTA, and redirects to the merchant', async context => {
+  let requests = 0;
+  const repository = new PromotionsRepository({ fetcher: async url => {
+    requests++;
+    assert.equal(url.href, 'https://www.dezcontos.pt/oferta/product-1');
+    return new Response('<a href="https://link.amazon/B01wBswyf">Comprar na Amazon</a>');
+  } });
+  const app = await createApp({ repository });
+  context.after(() => app.close());
+  const responses = await Promise.all([app.inject('/api/buy?id=product-1'), app.inject('/api/buy?id=product-1')]);
+  for (const response of responses) {
+    assert.equal(response.statusCode, 302);
+    assert.equal(response.headers.location, 'https://link.amazon/B01wBswyf');
+    assert.equal(response.headers['cache-control'], 'no-store');
+  }
+  await app.inject('/api/buy?id=product-1');
+  assert.equal(requests, 1);
+  for (const path of ['/api/buy?id=../secret', '/api/buy?id=https://example.com', '/api/buy']) {
+    assert.equal((await app.inject(path)).statusCode, 400);
+  }
+  await assert.rejects(repository.getPurchase('../secret'), { statusCode: 400 });
+});
+
+test('unavailable merchant link shows a branded error instead of opening the source', async context => {
+  const repository = new PromotionsRepository({ fetcher: async () => new Response('<h1>Sem link</h1>') });
+  const app = await createApp({ repository });
+  context.after(() => app.close());
+  const response = await app.inject('/api/buy?id=product-1');
+  assert.equal(response.statusCode, 502);
+  assert.equal(response.headers.location, undefined);
+  assert.match(response.body, /Ninjas Promotions/);
+  assert.match(response.body, /Link da loja indispon/);
+});

@@ -28,7 +28,7 @@ export async function createApp({ repository = new PromotionsRepository(), ingre
     app.get(route, async (_, reply) => reply.type(contentType).send(await readFile(new URL(`../${file}`, import.meta.url))));
   }
   app.get('/health', async () => ({ status: 'ok', name: 'Ninjas Promotions' }));
-  app.get('/api/meta', async () => ({ categories: CATEGORIES, sorts: SORTS, version: '0.1.1' }));
+  app.get('/api/meta', async () => ({ categories: CATEGORIES, sorts: SORTS, version: '0.1.2' }));
   app.get('/api/promotions', {
     schema: { querystring: {
       type: 'object', additionalProperties: false,
@@ -38,6 +38,21 @@ export async function createApp({ repository = new PromotionsRepository(), ingre
       },
     } },
   }, async request => repository.get(request.query.category, request.query.page));
+  app.get('/api/buy', {
+    schema: { querystring: {
+      type: 'object', required: ['id'], additionalProperties: false,
+      properties: { id: { type: 'string', pattern: '^[a-zA-Z0-9_-]+$', minLength: 1, maxLength: 300 } },
+    } },
+  }, async (request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    try {
+      const destination = await repository.getPurchase(request.query.id);
+      return reply.redirect(destination);
+    } catch (error) {
+      request.log.error(error);
+      return reply.code(502).type('text/html; charset=utf-8').send(`<!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ninjas Promotions</title><link rel="stylesheet" href="../style.css"></head><body><header class="app-header"><a class="brand" href="../"><img src="../icon.png" width="48" height="48" alt=""><strong>Ninjas Promotions</strong></a></header><main><h1>Link da loja indispon&iacute;vel</h1><p>N&atilde;o foi poss&iacute;vel obter o link de compra. Tente novamente mais tarde.</p><a class="primary-button" href="../">Voltar &agrave; app</a></main></body></html>`);
+    }
+  });
   app.get('/api/image', {
     schema: { querystring: {
       type: 'object', required: ['path'], additionalProperties: false,

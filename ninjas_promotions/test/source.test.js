@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { money, parsePromotions, sortProducts } from '../src/source.js';
+import { money, parsePromotions, parsePurchaseLink, sortProducts } from '../src/source.js';
 
 test('Portuguese prices retain thousands and decimals', () => {
   assert.equal(money('1.234,56 €'), 1234.56);
@@ -24,4 +24,16 @@ test('default order preserves source recency; other sorts do not mutate it', () 
   }
   assert.equal(sortProducts(products, 'price-desc')[0].title, 'Z');
   assert.equal(products[0].title, 'Z');
+});
+
+test('purchase links use the merchant CTA and preserve affiliate parameters', () => {
+  assert.equal(parsePurchaseLink('<a href="https://example.com">Publicidade</a><a href="https://link.amazon/B01wBswyf">Comprar na Amazon</a>'), 'https://link.amazon/B01wBswyf');
+  assert.equal(parsePurchaseLink('<a href="https://www.worten.pt/produtos/test?utm_source=partner&amp;variant=2"><span>Comprar na Worten</span></a>'), 'https://www.worten.pt/produtos/test?utm_source=partner&variant=2');
+});
+
+test('missing, source, and unsafe purchase destinations are not used', () => {
+  for (const url of ['/oferta/other', 'javascript:alert(1)', 'http://amazon.es/test', 'https://127.0.0.1/test', 'https://localhost/test', 'https://user:password@example.com/test']) {
+    assert.equal(parsePurchaseLink(`<a href="${url}">Comprar na loja</a>`), null);
+  }
+  assert.equal(parsePurchaseLink('<a href="https://amazon.es/test">Outra oferta</a>'), null);
 });

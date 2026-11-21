@@ -36,7 +36,7 @@ function filteredProducts() {
 }
 
 function offerUrl(product) {
-  return /^https:\/\/www\.dezcontos\.pt\/oferta\/[a-zA-Z0-9_-]+$/.test(product.url) ? product.url : '#';
+  return /^[a-zA-Z0-9_-]{1,300}$/.test(product.id) ? `./api/buy?id=${encodeURIComponent(product.id)}` : '#';
 }
 
 function imageUrl(product) {
@@ -48,12 +48,12 @@ function renderCard(product) {
   return `<article class="product" data-id="${escape(product.id)}">
     ${product.discount ? `<span class="discount">-${escape(product.discount)}%</span>` : ''}
     <button class="icon-button save-button ${isSaved ? 'saved' : ''}" data-save="${escape(product.id)}" title="${isSaved ? 'Remover dos guardados' : 'Guardar produto'}" aria-label="${isSaved ? 'Remover dos guardados' : 'Guardar produto'}: ${escape(product.title)}" aria-pressed="${isSaved}">${icon('bookmark')}</button>
-    <button class="product-media" data-details="${escape(product.id)}" aria-label="Detalhes: ${escape(product.title)}"><img src="${escape(imageUrl(product))}" alt="${escape(product.title)}" loading="lazy" width="200" height="160"></button>
-    <div class="product-body"><h2 class="product-title" title="${escape(product.title)}">${escape(product.title)}</h2>
+    <a class="product-media" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer" aria-label="Comprar na loja: ${escape(product.title)}"><img src="${escape(imageUrl(product))}" alt="${escape(product.title)}" loading="lazy" width="200" height="160"></a>
+    <div class="product-body"><h2 class="product-title" title="${escape(product.title)}"><a href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer">${escape(product.title)}</a></h2>
     <div class="price-row"><span class="price">${escape(currency(product.price))}</span>${product.originalPrice ? `<del class="original">${escape(currency(product.originalPrice))}</del>` : ''}</div>
     <p class="saving">${product.saving > 0 ? `Poupa ${escape(currency(product.saving))}` : ''}</p>
     ${product.expired ? '<span class="tag-label expired-label">Expirado</span>' : product.tags?.length ? `<span class="tag-label">${escape(product.tags[0])}</span>` : ''}
-    <div class="product-footer"><span class="activity">${escape(product.activity)}</span><div class="product-actions"><button class="icon-button" data-details="${escape(product.id)}" title="Ver detalhes" aria-label="Ver detalhes: ${escape(product.title)}">${icon('scan-eye')}</button><a class="icon-button" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer" title="Abrir oferta original" aria-label="Abrir oferta: ${escape(product.title)}">${icon('arrow-up-right')}</a></div></div></div>
+    <div class="product-footer"><span class="activity">${escape(product.activity)}</span><div class="product-actions"><button class="icon-button" data-details="${escape(product.id)}" title="Ver detalhes" aria-label="Ver detalhes: ${escape(product.title)}">${icon('scan-eye')}</button><a class="icon-button" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer" title="Comprar na loja" aria-label="Comprar na loja: ${escape(product.title)}">${icon('arrow-up-right')}</a></div></div></div>
   </article>`;
 }
 
@@ -151,7 +151,7 @@ function toggleSave(id) {
 function showDetails(id) {
   const product = [...state.products, ...saved].find(item => item.id === id);
   if (!product) return;
-  element('details-content').innerHTML = `<img class="detail-image" src="${escape(imageUrl(product))}" alt="${escape(product.title)}"><h2 class="detail-title" id="detail-title">${escape(product.title)}</h2><div class="price-row"><span class="price">${escape(currency(product.price))}</span>${product.originalPrice ? `<del class="original">${escape(currency(product.originalPrice))}</del>` : ''}</div><p class="detail-description">${escape(product.description)}</p>${product.tags?.length ? `<p class="detail-description">${product.tags.map(escape).join(' / ')}</p>` : ''}<p class="detail-note">${escape(product.activity)}${product.expired ? ' / Expirado' : ''}</p><a class="primary-button" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer">${icon('external-link')}Ver oferta</a><p class="detail-note">Confirme o pre\u00e7o final, portes e condi\u00e7\u00f5es na loja. Podem existir cup\u00f5es ou requisitos de compra.</p>`;
+  element('details-content').innerHTML = `<img class="detail-image" src="${escape(imageUrl(product))}" alt="${escape(product.title)}"><h2 class="detail-title" id="detail-title">${escape(product.title)}</h2><div class="price-row"><span class="price">${escape(currency(product.price))}</span>${product.originalPrice ? `<del class="original">${escape(currency(product.originalPrice))}</del>` : ''}</div><p class="detail-description">${escape(product.description)}</p>${product.tags?.length ? `<p class="detail-description">${product.tags.map(escape).join(' / ')}</p>` : ''}<p class="detail-note">${escape(product.activity)}${product.expired ? ' / Expirado' : ''}</p><a class="primary-button" href="${escape(offerUrl(product))}" target="_blank" rel="noopener noreferrer">${icon('external-link')}Comprar na loja</a><p class="detail-note">Confirme o pre\u00e7o final, portes e condi\u00e7\u00f5es na loja. Podem existir cup\u00f5es ou requisitos de compra.</p>`;
   element('details').setAttribute('aria-labelledby', 'detail-title');
   element('details').showModal();
   icons();
