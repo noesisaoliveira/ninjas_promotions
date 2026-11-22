@@ -11,8 +11,9 @@ try {
   const stored = JSON.parse(localStorage.getItem('ninjas.saved.v1') || '[]');
   if (Array.isArray(stored)) saved = stored.filter(product => product && typeof product.id === 'string' && typeof product.title === 'string' && Number.isFinite(product.price)).slice(0, 500);
 } catch {}
-const state = { products: [], meta: { categories: [], sorts: [] }, category: 'promocoes', page: 0, total: 0, hasMore: false, loading: false, favorites: false, stale: false, fetchedAt: null, error: '', view: 'grid' };
+const state = { products: [], meta: { categories: [], sorts: [] }, category: 'promocoes', query: '', page: 0, total: 0, hasMore: false, loading: false, favorites: false, stale: false, fetchedAt: null, error: '', view: 'grid' };
 let controller;
+let searchTimer;
 let toastTimer;
 let purchaseController;
 let christmasClicks = [];
@@ -97,19 +98,22 @@ function render() {
   const category = state.meta.categories.find(item => item.id === state.category);
   element('heading').textContent = state.favorites ? 'Guardados' : state.category === 'promocoes' ? 'Todas as promo\u00e7\u00f5es' : category?.label || 'Promo\u00e7\u00f5es';
   const products = filteredProducts();
+  const globalSearch = !state.favorites && state.category === 'promocoes';
+  element('search').setAttribute('aria-label', globalSearch ? 'Pesquisar em todas as categorias' : 'Pesquisar produtos carregados');
+  element('search').placeholder = globalSearch ? 'Pesquisar em todas as categorias' : 'Pesquisar produtos carregados';
   element('products').className = `products ${state.view === 'list' ? 'list' : ''}`;
   element('products').setAttribute('aria-busy', String(state.loading));
   element('products').innerHTML = state.loading && !state.products.length && !state.favorites
     ? Array.from({ length: 8 }, () => '<div class="skeleton" aria-hidden="true"></div>').join('')
-    : products.length ? products.map(renderCard).join('') : `<div class="empty">${icon(state.favorites ? 'bookmark' : 'search-x')}<div>${state.favorites ? 'Nenhum produto guardado com estes filtros.' : 'Nenhum produto encontrado nos resultados carregados.'}</div></div>`;
+    : products.length ? products.map(renderCard).join('') : `<div class="empty">${icon(state.favorites ? 'bookmark' : 'search-x')}<div>${state.favorites ? 'Nenhum produto guardado com estes filtros.' : globalSearch && state.query ? 'Nenhum produto encontrado na pesquisa.' : 'Nenhum produto encontrado nos resultados carregados.'}</div></div>`;
   element('count').textContent = state.favorites
     ? `${number(products.length)} guardados`
-    : `${number(products.length)} vis\u00edveis / ${number(state.products.length)} carregados / ${number(state.total)} dispon\u00edveis`;
+    : `${number(products.length)} vis\u00edveis / ${number(state.products.length)} carregados / ${number(state.total)} ${globalSearch && state.query ? 'resultados' : 'dispon\u00edveis'}`;
   element('updated').textContent = state.favorites ? 'Pre\u00e7os guardados na data de sele\u00e7\u00e3o' : state.fetchedAt ? `Consultado \u00e0s ${new Date(state.fetchedAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}` : '';
   element('status').hidden = !state.error && !state.stale;
   element('status').className = `status ${state.error ? 'error' : ''}`;
   element('status').textContent = state.error || 'Fonte indispon\u00edvel. A mostrar a \u00faltima consulta em cache.';
-  element('connection').textContent = state.loading ? 'A atualizar' : state.error || state.stale ? 'Sem atualiza\u00e7\u00e3o' : 'Radar ativo';
+  element('connection').textContent = state.loading ? globalSearch && state.query ? 'A pesquisar' : 'A atualizar' : state.error || state.stale ? 'Sem atualiza\u00e7\u00e3o' : 'Radar ativo';
   element('connection').className = `connection ${state.error || state.stale ? 'error' : state.loading ? '' : 'live'}`;
   element('load-more').hidden = state.favorites || !state.hasMore;
   element('load-more').disabled = state.loading;
@@ -134,18 +138,37 @@ function updateTags() {
   element('tag').value = tags.includes(previous) ? previous : '';
 }
 
+function searchInput() {
+  if (state.favorites || state.category !== 'promocoes') {
+    render();
+    return;
+  }
+  clearTimeout(searchTimer);
+  controller?.abort();
+  controller = null;
+  Object.assign(state, { query: element('search').value.trim(), products: [], page: 0, total: 0, hasMore: false, loading: true, error: '', stale: false, fetchedAt: null });
+  render();
+  searchTimer = setTimeout(() => load(true), 350);
+}
+
 async function load(reset = false) {
+  clearTimeout(searchTimer);
+  searchTimer = null;
   controller?.abort();
   const current = new AbortController();
   controller = current;
   state.loading = true;
   state.error = '';
+  const query = state.category === 'promocoes' ? element('search').value.trim() : '';
+  if (query !== state.query) reset = true;
+  state.query = query;
   if (reset) {
     state.products = []; state.page = 0; state.total = 0; state.hasMore = false; state.fetchedAt = null; state.stale = false;
   }
   render();
   try {
     const params = new URLSearchParams({ category: state.category, page: state.page + 1 });
+    if (query) params.set('q', query);
     const response = await fetch(`./api/promotions?${params}`, { signal: current.signal });
     if (!response.ok) throw new Error('Nao foi possivel consultar a fonte.');
     const data = await response.json();
@@ -156,7 +179,7 @@ async function load(reset = false) {
     Object.assign(state, { page: data.page, total: data.total, hasMore: data.hasMore, stale: state.stale || data.stale, fetchedAt: data.fetchedAt });
     updateTags();
   } catch (error) {
-    if (error.name !== 'AbortError') state.error = 'N\u00e3o foi poss\u00edvel obter as promo\u00e7\u00f5es. Tente atualizar novamente.';
+    if (controller === current && error.name !== 'AbortError') state.error = 'N\u00e3o foi poss\u00edvel obter as promo\u00e7\u00f5es. Tente atualizar novamente.';
   } finally {
     if (controller === current) { state.loading = false; render(); }
   }
@@ -251,12 +274,29 @@ element('products').addEventListener('error', event => {
 element('category-select').addEventListener('change', event => chooseCategory(event.target.value));
 element('refresh').addEventListener('click', () => state.meta.categories.length ? load(true) : init());
 element('load-more').addEventListener('click', () => load());
-element('all-tab').addEventListener('click', () => { state.favorites = false; updateTags(); render(); });
-element('favorites-tab').addEventListener('click', () => { state.favorites = true; updateTags(); render(); });
-for (const id of ['search', 'max-price', 'min-discount', 'tag', 'hide-expired', 'sort']) element(id).addEventListener('input', render);
+element('all-tab').addEventListener('click', () => {
+  state.favorites = false;
+  updateTags();
+  if (state.category === 'promocoes' && (state.page === 0 || state.query !== element('search').value.trim())) load(true);
+  else render();
+});
+element('favorites-tab').addEventListener('click', () => {
+  clearTimeout(searchTimer);
+  searchTimer = null;
+  controller?.abort();
+  controller = null;
+  state.loading = false;
+  state.favorites = true;
+  updateTags();
+  render();
+});
+element('search').addEventListener('input', searchInput);
+for (const id of ['max-price', 'min-discount', 'tag', 'hide-expired', 'sort']) element(id).addEventListener('input', render);
 element('filters').addEventListener('submit', event => event.preventDefault());
 element('clear').addEventListener('click', () => {
-  element('filters').reset(); element('search').value = ''; element('sort').value = 'recent'; render();
+  element('filters').reset(); element('search').value = ''; element('sort').value = 'recent';
+  if (!state.favorites && state.category === 'promocoes' && (state.query || state.loading)) load(true);
+  else render();
 });
 for (const view of ['grid', 'list']) element(`${view}-view`).addEventListener('click', () => { state.view = view; render(); });
 element('brand-icon').addEventListener('click', christmasClick);

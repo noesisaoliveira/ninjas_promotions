@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+- Pesquisar o catalogo completo da fonte em Todas as categorias, em vez de apenas os produtos recentes carregados.
+- Manter o termo na paginacao, separar a cache por pesquisa e cancelar consultas antigas durante a escrita.
+- Preservar as variantes Only & Sons, only sons, onlysons e sons only na pesquisa global.
+
 ## 0.1.5
 
 - Pesquisa tolerante a simbolos, acentos, maiusculas, espacos e palavras noutra ordem.

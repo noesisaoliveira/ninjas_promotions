@@ -137,6 +137,54 @@ test('Amazon expansion rejects private, unrelated and native-app redirects befor
   }
 });
 
+test('global search queries the complete source search and isolates cached query pages', async context => {
+  const requested = [];
+  const repository = new PromotionsRepository({ fetcher: async url => {
+    requested.push(url.href);
+    if (url.pathname === '/promocoes') return new Response(html);
+    return new Response('<body>30 produtos<a href="/oferta/shelly"><p>Shelly 1 Gen3</p><span class="text-price-small">12,50</span><p>Publicado hoje</p></a></body>');
+  } });
+  const app = await createApp({ repository });
+  context.after(() => app.close());
+  await app.inject('/api/promotions');
+  const response = await app.inject('/api/promotions?q=shelly');
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.json().products[0].title, 'Shelly 1 Gen3');
+  assert.equal(response.json().total, 30);
+  assert.equal(response.json().hasMore, true);
+  await app.inject('/api/promotions?q=shelly');
+  assert.equal(requested.length, 2);
+  await app.inject('/api/promotions?q=shelly&page=2');
+  await app.inject('/api/promotions?q=another');
+  assert.deepEqual(requested.map(url => new URL(url).pathname), ['/promocoes', '/pesquisa', '/pesquisa', '/pesquisa']);
+  assert.equal(new URL(requested[1]).searchParams.get('q'), 'shelly');
+  assert.equal(new URL(requested[2]).searchParams.get('page'), '2');
+  assert.equal(new URL(requested[3]).searchParams.get('q'), 'another');
+  assert.equal((await app.inject('/api/promotions?q=' + 'a'.repeat(201))).statusCode, 400);
+  assert.equal((await app.inject('/api/promotions?category=tecnologia&q=shelly')).statusCode, 400);
+});
+
+test('global search supports an empty result without showing the recent feed', async () => {
+  const repository = new PromotionsRepository({ fetcher: async () => new Response('<body>0 produtos</body>') });
+  const result = await repository.get('promocoes', 1, 'no-result');
+  assert.equal(result.total, 0);
+  assert.deepEqual(result.products, []);
+  assert.equal(result.hasMore, false);
+});
+
+test('global search preserves known joined and reordered Only & Sons queries', async () => {
+  let requests = 0;
+  const repository = new PromotionsRepository({ fetcher: async url => {
+    requests++;
+    assert.equal(url.searchParams.get('q'), 'only sons');
+    return new Response(html);
+  } });
+  for (const query of ['onlysons', 'only sons', 'Only & Sons', 'sons only', 'ONLY&SONS']) {
+    await repository.get('promocoes', 1, query);
+  }
+  assert.equal(requests, 1);
+});
+
 test('Amazon expansion bounds loops and leaves other stores unchanged', async () => {
   let requests = 0;
   const repository = new PromotionsRepository({ fetcher: async () => {

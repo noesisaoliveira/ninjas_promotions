@@ -14,7 +14,9 @@ Sem opcoes obrigatorias, contas, tokens ou portas a configurar. Ingress na porta
 
 Todas as categorias inicia pelos resultados recentes, incluindo atualizacoes. As 13 categorias correspondem aos enderecos verificados na fonte: Tecnologia, Casa, Moda e Acessorios, Beleza e Saude, Bebes e Criancas, Mercearia, Desporto e Lazer, Cultura e Jogos, Papelaria, Animais de Estimacao, Auto e Moto, Bricolage e Presentes.
 
-Cada pedido carrega ate 24 produtos. **Carregar mais** inclui a pagina seguinte e elimina duplicados. Pesquisa, preco maximo, desconto minimo, etiqueta e ordenacao aplicam-se apenas aos resultados carregados. Os contadores distinguem resultados visiveis, carregados e o total da fonte. Ofertas marcadas como expiradas sao ocultadas por defeito.
+Cada pedido carrega ate 24 produtos. **Carregar mais** inclui a pagina seguinte e elimina duplicados. Em Todas as categorias, a pesquisa consulta o catalogo completo da fonte e mantem o termo nas paginas seguintes. Uma breve pausa na escrita agrupa pedidos; mudar o termo cancela a consulta anterior e reinicia na primeira pagina. Limpar a pesquisa volta as promocoes recentes. As variantes onlysons, only sons e sons only sao encaminhadas para a mesma pesquisa Only & Sons.
+
+Dentro de uma categoria selecionada ou dos guardados, a pesquisa continua sobre os resultados locais. Preco maximo, desconto minimo, etiqueta e ordenacao aplicam-se aos produtos carregados. Os contadores distinguem resultados visiveis, carregados e o total da fonte para a pesquisa ou categoria. Ofertas marcadas como expiradas sao ocultadas por defeito.
 
 **Mais recentes** preserva a ordem da fonte. Os restantes criterios sao locais: menor/maior preco, maior desconto percentual, maior poupanca absoluta e nome A-Z. Nao foi encontrado um seletor de ordenacao no site consultado. A app nao descarrega todos os milhares de produtos para ordenar globalmente.
 
